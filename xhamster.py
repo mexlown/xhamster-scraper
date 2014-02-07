@@ -1,22 +1,27 @@
 #============================================
-#   python xhamster gallery scraper
-#   written by qt
+#   python xhamster gallery scraper v1.1
+#   copyright 2014 qt
+#   this program is free software under the GNU GPL version 3
 #   usage: $program_name $url $output_dir
 #
+#   KNOWN BUGS:
+#   - cant handle backslashes at the end of the output_dir argument
+#
 #   TODO:
-#   - add a feature to tell whether the out dir ends in a backslash or slash (depending on OS)
 #   - split the program into functions
 #   - make it portable to different websites
 #   - port it to different sites
 #============================================
 
 import sys
+import os
 import re
 from file_io import *
 from urllib import request
 
 def clean_page(page):
 	return(str(page.read()).replace(r"\n", "\n")).replace(r"\r", "\r")
+
 #----------------------------------------------------------------------------------------------------------------
 # stage 0
 # parse args
@@ -29,6 +34,16 @@ except:
 print("stage 0 complete")
 #----------------------------------------------------------------------------------------------------------------
 # stage 1
+# make directory
+try:
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+except:
+    print("fuck, cant make target directory")
+    sys.exit()
+print("stage 1 complete")
+#----------------------------------------------------------------------------------------------------------------
+# stage 2
 # get gallery index
 try:
 	index_page = request.urlopen(gallery_url)
@@ -37,9 +52,9 @@ except:
 	print("fuck, cant retrieve and store file located at the given URL")
 	sys.exit()
 	
-print("stage 1 complete")
+print("stage 2 complete")
 #----------------------------------------------------------------------------------------------------------------
-# stage 2
+# stage 3
 # build image page list
 try:
     image_page_URL = "http://xhamster.com/photos/view/"
@@ -55,9 +70,9 @@ except:
     print("fuck, cant build wrapper page list")
     sys.exit()
     
-print("stage 2 complete")
+print("stage 3 complete")
 #----------------------------------------------------------------------------------------------------------------
-#stage 3
+#stage 4
 #with each page, identify the image link save that fucker
 try:
     image_URL_prefix = r"http://ep.xhamster.com/"
@@ -83,7 +98,7 @@ except:
     print("fuck, cant parse containers and/or save images")
     sys.exit()
     
-print("stage 3 complete: fucking done")
+print("stage 4 complete: fucking done")
 
 
 
