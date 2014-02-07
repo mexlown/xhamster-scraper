@@ -6,5 +6,6 @@ using the script:
 
 	run via the commandline with xhamster.py [url] [folder to save images to]
 
+	supports gif, png, jpeg and jpg extensions and is case insensetive
 	obviously you need python to use this
 	DO NOT end the folder string with a backslash

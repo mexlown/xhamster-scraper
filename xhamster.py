@@ -1,5 +1,5 @@
 #============================================
-#   python xhamster gallery scraper v1.1
+#   python xhamster gallery scraper v1.2
 #   copyright 2014 qt
 #   this program is free software under the GNU GPL version 3
 #   usage: $program_name $url $output_dir
@@ -8,31 +8,88 @@
 #   - cant handle backslashes at the end of the output_dir argument
 #
 #   TODO:
-#   - split the program into functions
-#   - make it portable to different websites
 #   - port it to different sites
 #============================================
-
 import sys
 import os
 import re
-from file_io import *
 from urllib import request
-
+#----------------------------------------------------------------------------------------------------------------
+#   utility functions
+#----------------------------------------------------------------------------------------------------------------
 def clean_page(page):
 	return(str(page.read()).replace(r"\n", "\n")).replace(r"\r", "\r")
-
 #----------------------------------------------------------------------------------------------------------------
+#   main functions
+#----------------------------------------------------------------------------------------------------------------
+def get_page(URL):
+    #stage 2
+    #retrieve and return the index page
+    try:
+        page = request.urlopen(URL)
+        return(clean_page(page))
+    except:
+        print("fuck, cant retrieve and store file located at the given URL")
+        sys.exit()
+#----------------------------------------------------------------------------------------------------------------
+def build_list(index_file):
+    #stage 3
+    #build and return a list of image container page URLs to grab
+    try:
+        image_page_URL = "http://xhamster.com/photos/view/"
+        print(" - " + str(index_file.count(image_page_URL)) + " images identified")#debug
+
+        search_expression = 'http://xhamster\.com/photos/view/(.*?).html'
+        search_results = re.findall(search_expression, index_file)
+
+        page_list = []
+        for i in search_results:
+            page_list.append(image_page_URL + i + ".html")
+        return(page_list)
+    except:
+        print("fuck, cant build wrapper page list")
+        sys.exit()
+#----------------------------------------------------------------------------------------------------------------
+def grab_files(page_list):
+    #stage 4
+    #with each container URL get the file, search for the image and then save it
+    try:
+        image_URL_prefix = r"http://ep.xhamster.com/"
+        search_expression = image_URL_prefix + "(.*?\.jpg|png|gif|jpeg)"
+    
+        for i in page_list:
+            wrapper_page = get_page(i)
+            image_URL_suffix = re.findall(search_expression, wrapper_page, re.IGNORECASE)[0]
+            image = request.urlopen(image_URL_prefix + image_URL_suffix)
+            
+            image_name = ""
+            for c in reversed(image_URL_suffix):
+                if c != "/":
+                    image_name = image_name + c
+                else:
+                    image_name = image_name[::-1]
+                    break
+                
+            image_file = open(output_directory + image_name, "wb+")
+            image_file.write(image.read())
+            print(image_name + " saved")
+    except:
+        print("fuck, cant parse containers and/or save images")
+        sys.exit()
+#----------------------------------------------------------------------------------------------------------------
+#   main procedure
+#----------------------------------------------------------------------------------------------------------------
+
 # stage 0
 # parse args
 try:
-    gallery_url, output_directory = sys.argv[1], sys.argv[2] + "/"
+    gallery_URL, output_directory = sys.argv[1], sys.argv[2] + "/"
 except:
     print("fuck, cant process arguments")
     sys.exit()
     
 print("stage 0 complete")
-#----------------------------------------------------------------------------------------------------------------
+
 # stage 1
 # make directory
 try:
@@ -42,63 +99,19 @@ except:
     print("fuck, cant make target directory")
     sys.exit()
 print("stage 1 complete")
-#----------------------------------------------------------------------------------------------------------------
-# stage 2
-# get gallery index
-try:
-	index_page = request.urlopen(gallery_url)
-	page_file_data = clean_page(index_page)
-except:
-	print("fuck, cant retrieve and store file located at the given URL")
-	sys.exit()
-	
+
+index_file = get_page(gallery_URL)
 print("stage 2 complete")
-#----------------------------------------------------------------------------------------------------------------
-# stage 3
-# build image page list
-try:
-    image_page_URL = "http://xhamster.com/photos/view/"
-    print(" - " + str(page_file_data.count(image_page_URL)) + " images identified")#debug
 
-    stage2_search_expression = 'http://xhamster\.com/photos/view/(.*?).html'
-    search_results = re.findall(stage2_search_expression, page_file_data)
-
-    page_list = []
-    for i in search_results:
-        page_list.append(image_page_URL + i + ".html")
-except:
-    print("fuck, cant build wrapper page list")
-    sys.exit()
-    
+page_list = build_list(index_file)
 print("stage 3 complete")
-#----------------------------------------------------------------------------------------------------------------
-#stage 4
-#with each page, identify the image link save that fucker
-try:
-    image_URL_prefix = r"http://ep.xhamster.com/"
-    stage3_search_expression = image_URL_prefix + "(.*?\.jpg|png|gif)"
-    for i in page_list:
-        wrapper_page = request.urlopen(i)
-        wrapper_page_data = clean_page(wrapper_page)
-        image_URL_suffix = re.findall(stage3_search_expression, wrapper_page_data)[0]
-        image = request.urlopen(image_URL_prefix + image_URL_suffix)
-        
-        image_name = ""
-        for c in reversed(image_URL_suffix):
-            if c != "/":
-                image_name = image_name + c
-            else:
-                image_name = image_name[::-1]
-                break
-            
-        image_file = open(output_directory + image_name, "wb+")
-        image_file.write(image.read())
-        print(image_name + " saved")
-except:
-    print("fuck, cant parse containers and/or save images")
-    sys.exit()
-    
+
+grab_files(page_list)
 print("stage 4 complete: fucking done")
+#----------------------------------------------------------------------------------------------------------------
+
+    
+
 
 
 

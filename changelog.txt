@@ -1,2 +1,6 @@
+v1.2:
+	split program into functions to make it less of a mess
+	fixed image search pattern relying on matching case (i also forgot jpeg)
+
 v1.1:
 	fixed error when target directory did not exist
