@@ -1,5 +1,5 @@
 #============================================
-#   python xhamster gallery scraper v1.3
+#   python gelbooru scraper v1
 #   copyright 2014 qt
 #   this program is free software under the GNU GPL version 3
 #   usage: $program_name $url $output_dir
@@ -10,6 +10,7 @@
 #   TODO:
 #   - port it to different sites
 #============================================
+# gelbooru.py "http://gelbooru.com/index.php?page=post&s=list&tags=sakuru" "D:\tmp\working"
 import sys
 import os
 import re
@@ -18,7 +19,11 @@ from urllib import request
 #   utility functions
 #----------------------------------------------------------------------------------------------------------------
 def clean_page(page):
-	return(str(page.read()).replace(r"\n", "\n")).replace(r"\r", "\r")
+    page = str(page).replace(r"\n", "\n")
+    page = page.replace(r"\r", "\r")
+    page = page.replace(r"\t", "\t")
+    page = page.replace(r"amp;", "")
+    return(page)
 #----------------------------------------------------------------------------------------------------------------
 #   main functions
 #----------------------------------------------------------------------------------------------------------------
@@ -27,7 +32,7 @@ def get_page(URL):
     #retrieve and return the index page
     try:
         page = request.urlopen(URL)
-        return(clean_page(page))
+        return(clean_page(page.read()))
     except:
         print("fuck, cant retrieve and store file located at the given URL")
         sys.exit()
@@ -36,15 +41,14 @@ def build_list(index_file):
     #stage 3
     #build and return a list of image container page URLs to grab
     try:
-        image_page_URL = "http://xhamster.com/photos/view/"
-        print(" - " + str(index_file.count(image_page_URL)) + " images identified")#debug
+        image_page_URL = "index.php?page=post&s=view&id="
 
-        search_expression = 'http://xhamster\.com/photos/view/(.*?).html'
+        search_expression = '\"index\.php\?page=post\&s=view\&id=([0-9]*?)\"'
         search_results = re.findall(search_expression, index_file)
 
         page_list = []
         for i in search_results:
-            page_list.append(image_page_URL + i + ".html")
+            page_list.append("http://gelbooru.com/" + image_page_URL + i)
         return(page_list)
     except:
         print("fuck, cant build wrapper page list")
@@ -54,9 +58,9 @@ def grab_files(page_list):
     #stage 4
     #with each container URL get the file, search for the image and then save it
     try:
-        image_URL_prefix = r"http://ep.xhamster.com/"
+        image_URL_prefix = r"http://simg.gelbooru.com//images/"
         search_expression = image_URL_prefix + "(.*?\.jpg|.*?\.png|.*?\.gif|.*?\.jpeg)"
-    
+
         for i in page_list:
             wrapper_page = get_page(i)
             image_URL_suffix = re.findall(search_expression, wrapper_page, re.IGNORECASE)[0]

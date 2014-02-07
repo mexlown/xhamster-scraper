@@ -1,3 +1,6 @@
+v1.3:
+	added gelbooru scraper to collection
+	fixed regex, again
 v1.2:
 	split program into functions to make it less of a mess
 	fixed image search pattern relying on matching case (i also forgot jpeg)
