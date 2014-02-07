@@ -1,5 +1,5 @@
-python xhamster gallery scraper v1.1
-copyright 2014 qt
+python xhamster gallery scraper v1.1, copyright 2014 qt
+
 published under the GNU GPL version 3, see LICENSE.md for details
 
 using the script:
