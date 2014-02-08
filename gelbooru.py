@@ -5,12 +5,17 @@
 #   usage: $program_name $url $output_dir
 #
 #   KNOWN BUGS:
+#   - when dealing with a series of images the files can often be out of order
+#     this is due to the way in which the files are named, however as they are
+#     downloaded in a certain order its quite possible to reorder them though
+#     a batch renaming utility after theyve been downloaded
 #   - cant handle backslashes at the end of the output_dir argument
 #
 #   TODO:
+#   - add support for multiple pages in (pages go by multiples of 63)
 #   - port it to different sites
 #============================================
-# gelbooru.py "http://gelbooru.com/index.php?page=post&s=list&tags=sakuru" "D:\tmp\working"
+
 import sys
 import os
 import re
