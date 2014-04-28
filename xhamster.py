@@ -54,9 +54,11 @@ def grab_files(page_list):
     #stage 4
     #with each container URL get the file, search for the image and then save it
     try:
-        image_URL_prefix = r"http://ep.xhamster.com/"
-        search_expression = image_URL_prefix + "(.*?\.jpg|.*?\.png|.*?\.gif|.*?\.jpeg)"
-    
+        #image_URL_prefix = r"http://ep.xhamster.com/"
+        #search_expression = image_URL_prefix + "(.*?\.jpg|.*?\.png|.*?\.gif|.*?\.jpeg)"
+        image_URL_prefix = r"http://"
+        search_expression = image_URL_prefix + "(ep[1-9]\.xhamster\.com\/(?:.*?\$
+
         for i in page_list:
             wrapper_page = get_page(i)
             image_URL_suffix = re.findall(search_expression, wrapper_page, re.IGNORECASE)[0]
